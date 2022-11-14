@@ -32,7 +32,7 @@ class Space:
 
         # TODO: Make sure this new iso isn't colliding with any existing isos
 
-        # Make sure we aren't colliding with the avoid object if it's passed
+        # Make sure we aren't colliding with the avoid object if one was passed
         if avoid is not None and InterstellarObject.collision(iso, avoid):
             print('Invalid starting position for interstellar object. Re-generating')
             return self.create_iso(min_radius, max_radius, max_speed, avoid)
