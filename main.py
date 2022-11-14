@@ -40,7 +40,7 @@ from InterstellarObject import InterstellarObject
 DAYS_IN_YEAR = 365
 METER = 1  # 1 meter base unit
 KILOMETER = 1000 * METER
-AU = 149597870691 * METER  # astronomical unit. Space is very big.
+AU = 149597870700 * METER  # astronomical unit. Space is very big. from https://cneos.jpl.nasa.gov/glossary/au.html
 SPEED_OF_LIGHT_PER_DAY = 173 * AU  # speed of light is 173 astronomical units a day
 ORIGIN = Vector3(0, 0, 0)  # The center of the universe
 
