@@ -4,9 +4,9 @@ from Vector3 import Vector3
 class InterstellarObject:
 
     def __init__(self, radius, position, velocity):
-        self.radius = radius
-        self.originalPosition = position
-        self.position = position
+        self.radius = radius  # To keep the collision math as simple as possible, we will model everything as a sphere
+        self.originalPosition = position  # starting position
+        self.position = position  # current calculated position
         self.velocity = velocity
 
     @property
