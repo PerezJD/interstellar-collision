@@ -30,6 +30,11 @@ from InterstellarObject import InterstellarObject
 # 10% lightspeed would get a craft to Alpha Centauri in 44 years.
 # thus 5% lightspeed (our target speed) would take twice as long, or 88 years
 #
+# https://imagine.gsfc.nasa.gov/features/cosmic/nearest_star_info.html
+# Proxima Centauri, the closest star to our own, is still 40,208,000,000,000 km away. (Or about 268,770 AU.)
+#
+
+# TODO: instead of AU consider measuring everything in lightyears
 
 # Constants
 DAYS_IN_YEAR = 365
@@ -81,7 +86,7 @@ if __name__ == '__main__':
     sector.create_interstellar_objects(small_isos, SMALL_ISO_MIN_RADIUS, SMALL_ISO_MAX_RADIUS, ISO_MAX_SPEED, starship)
     sector.create_interstellar_objects(large_isos, LARGE_ISO_MIN_RADIUS, LARGE_ISO_MAX_RADIUS, ISO_MAX_SPEED, starship)
 
-    print(f'\nCourse laid in, Captain. Launching {ship_name} from origin with velocity: {starship.velocity.coordinate}')
+    print(f'\nCourse laid in, Captain. Launching {ship_name} from origin with velocity: {starship.coordinate}')
 
     # Engage!
     for day in range(ship_travel_days):
