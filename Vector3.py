@@ -49,6 +49,7 @@ class Vector3:
 
     @staticmethod
     def distance_between_vectors(v1, v2):
+        # Euclidean distance
         x_dif = math.pow(v2.x - v1.x, 2)
         y_dif = math.pow(v2.y - v1.y, 2)
         z_dif = math.pow(v2.z - v1.z, 2)
