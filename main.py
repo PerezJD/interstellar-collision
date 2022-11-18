@@ -1,4 +1,5 @@
 import time
+from datetime import date
 
 from Space import Space
 from Vector3 import Vector3
@@ -32,19 +33,19 @@ from InterstellarObject import InterstellarObject
 #
 # https://imagine.gsfc.nasa.gov/features/cosmic/nearest_star_info.html
 # Proxima Centauri, the closest star to our own, is still 40,208,000,000,000 km away. (Or about 268,770 AU.)
+# 4.246 lightyears
 #
-
-# TODO: instead of AU consider measuring everything in lightyears
 
 # Constants
 DAYS_IN_YEAR = 365
-METER = 1  # 1 meter base unit
+METER = .001  # 1 meter base unit. Scaled down for efficiency
 KILOMETER = 1000 * METER
 AU = 149597870700 * METER  # astronomical unit. Space is very big. from https://cneos.jpl.nasa.gov/glossary/au.html
 SPEED_OF_LIGHT_PER_DAY = 173 * AU  # speed of light is 173 astronomical units a day
+LIGHTYEAR = 63241.1 * AU  # Distance light travels in one year
 ORIGIN = Vector3(0, 0, 0)  # The center of the universe
 
-# Large and small iso sizes are based on data from https://solarsystem.nasa.gov/ cited above
+# "Large" and "small" iso sizes are based on data from https://solarsystem.nasa.gov/ cited above
 
 # Objects with diameter between between 1m and 1km
 SMALL_ISO_MIN_RADIUS = METER / 2
@@ -56,29 +57,40 @@ LARGE_ISO_MAX_RADIUS = (530 * KILOMETER) / 2
 
 ISO_MAX_SPEED = 1546560  # Avg. max speed of an iso in 1 day. Based on 17.9km/s from quora, so might not be accurate
 
-if __name__ == '__main__':
 
-    # TODO: Update these options with actual desired data
-    # Voyage configuration options.
-    ship_name = "USS Enterprise (NCC-1701)"
-    ship_radius = 162.7827  # Avg. of dimensions of a Federation Constitution class starship from Wikipedia
-    ship_travel_days = 4 * DAYS_IN_YEAR  # 4 year travel time (in days)
-    ship_speed = SPEED_OF_LIGHT_PER_DAY * .05  # 5% light speed (Warp factor .05)
-    sector_size = 1  # Size of our sector in cubic AUs
-    large_isos = 10000  # Number of large interstellar bodies to (potentially) encounter
-    small_isos = 10000  # Number of small interstellar bodies to (potentially) encounter
+def begin_voyage(
+    ship_name,
+    ship_radius,
+    ship_travel_distance,
+    ship_speed,
+    sector_size,
+    large_isos,
+    small_isos
+):
+    # Get the current stardate
+    today = date.today()
+    stardate = f'{(today.year - 1900)}{today.strftime("%m")}.{today.day}'
 
-    #  For fun, track how long the simulation takes to run
-    startTime = time.time()
+    print(f'\nCaptain\'s Log. Stardate: {stardate}. These are the voyages of the starship {ship_name}.')
 
-    # Convert size to axis limit. Ex. If sector is 1 cubic AU the limit of each axis is .5 AU from the origin
-    sector_size_limit = (1 * AU) / 2
+    # For fun, track how long the simulation takes to run
+    start_time = time.time()
+
+    # Perform measurement conversions
+    actual_ship_radius = ship_radius * METER
+    actual_ship_travel_distance = ship_travel_distance * LIGHTYEAR
+    actual_ship_speed = ship_speed * SPEED_OF_LIGHT_PER_DAY
+    actual_sector_size = sector_size * LIGHTYEAR
+
+    # Convert size to axis limit.
+    # Ex. If sector is 1 cubic lightyear the limit of each axis is .5 lightyears from the origin
+    sector_size_limit = actual_sector_size / 2
 
     # Create the starship
     starship = InterstellarObject(
-        ship_radius,
+        actual_ship_radius,
         ORIGIN,
-        Vector3.velocity_vector(ship_speed, Vector3.new_random_vector(0, sector_size_limit))
+        Vector3.velocity_vector(actual_ship_speed, Vector3.new_random_vector(0, sector_size_limit))
     )
 
     # Create a sector of space to fly through and populate it with interstellar objects
@@ -86,24 +98,45 @@ if __name__ == '__main__':
     sector.create_interstellar_objects(small_isos, SMALL_ISO_MIN_RADIUS, SMALL_ISO_MAX_RADIUS, ISO_MAX_SPEED, starship)
     sector.create_interstellar_objects(large_isos, LARGE_ISO_MIN_RADIUS, LARGE_ISO_MAX_RADIUS, ISO_MAX_SPEED, starship)
 
-    print(f'\nCourse laid in, Captain. Launching {ship_name} from origin with velocity: {starship.coordinate}')
+    print(f'\nCourse laid in, Captain. Launching {ship_name} from origin with velocity: {starship.velocity.coordinate}')
+    print(f'\nEngage!')
+
+    distance_traveled = 0
+    days_travelled = 0
 
     # Engage!
-    for day in range(ship_travel_days):
-        print(f'Day: {day}')
+    while distance_traveled < actual_ship_travel_distance:
+        days_travelled += 1
 
         # First update the ship's position
-        starship.update_position(day)
-        print(f'Ship position: {starship.coordinate}')
+        starship.update_position(days_travelled)
+        distance_traveled = Vector3.distance_between_vectors(ORIGIN, starship.position)
+
+        # Captains Log
+        print(f'\nDay: {days_travelled}. Ship position: {starship.coordinate}. Distance Travelled: {distance_traveled}')
 
         # Now update all the ios's and calculate collisions
         for iso in sector.isos:
-            iso.update_position(day)
+            iso.update_position(days_travelled)
 
             if InterstellarObject.collision(starship, iso):
                 # There was a collision. Log it and exit the program
-                print(f'Collision at {starship.coordinate}')
+                print(f'\nCollision at {starship.coordinate}')
                 exit()
 
-    executionTime = (time.time() - startTime)
-    print('\nExecution time in minutes: ' + str(executionTime / 60))
+    execution_time = (time.time() - start_time)
+    print('\nExecution time in minutes: ' + str(execution_time / 60))
+
+
+if __name__ == '__main__':
+
+    # Voyage configuration options.
+    ship_name = "Enterprise"
+    ship_radius = 162.7827 * METER  # Avg. of dimensions of a Federation Constitution class starship from Wikipedia
+    ship_travel_distance = 1  # Distance the ship will travel in light years
+    ship_speed = .05  # Percentage of light speed the ship will travel at
+    sector_size = 2  # Size of our sector in cubic lightyears
+    large_isos = 10000  # Number of large interstellar bodies to (potentially) encounter
+    small_isos = 10000  # Number of small interstellar bodies to (potentially) encounter
+
+    begin_voyage(ship_name, ship_radius, ship_travel_distance, ship_speed, sector_size, large_isos, small_isos)
